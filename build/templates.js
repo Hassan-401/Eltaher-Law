@@ -58,11 +58,11 @@ function header(depth, active) {
 
       <a href="${b}articles.html"${on('articles')}>المقالات</a>
       <a href="${b}contact.html"${on('contact')}>تواصل معنا</a>
-      <a href="tel:${site.phone1}" class="btn btn--gold nav__cta-mobile">اتصل الآن</a>
+      <a href="tel:${site.phone1}" class="btn btn--call nav__cta-mobile">اتصل الآن</a>
     </nav>
 
     <div class="nav__actions">
-      <a href="tel:${site.phone1}" class="btn btn--gold btn--sm">
+      <a href="tel:${site.phone1}" class="btn btn--call btn--sm btn--pulse">
         ${icons.phone}<span>${site.phone1}</span>
       </a>
       <button class="nav__toggle" id="navToggle" aria-label="فتح القائمة" aria-expanded="false">
@@ -143,7 +143,19 @@ function footer(depth) {
 
 <button class="fab fab--top" id="toTop" aria-label="العودة للأعلى">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
-</button>`;
+</button>
+
+<!-- شريط الاتصال الثابت أسفل الشاشة (موبايل فقط) -->
+<div class="callbar">
+  <a class="callbar__btn callbar__btn--call" href="tel:${site.phone1}">
+    ${icons.phoneSolid}
+    <span><b>اتصل الآن</b><small dir="ltr">${site.phone1}</small></span>
+  </a>
+  <a class="callbar__btn callbar__btn--wa" href="${waLink('السلام عليكم')}" target="_blank" rel="noopener">
+    ${icons.whatsapp}
+    <span><b>واتساب</b><small>رد سريع</small></span>
+  </a>
+</div>`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -224,7 +236,7 @@ function ctaBand(depth, opts = {}) {
       <p>${p}</p>
     </div>
     <div class="cta__btns">
-      <a href="tel:${site.phone1}" class="btn btn--gold btn--lg">اتصل الآن — <bdi dir="ltr">${site.phone1}</bdi></a>
+      <a href="tel:${site.phone1}" class="btn btn--call btn--lg">${icons.phoneSolid} اتصل الآن — <bdi dir="ltr">${site.phone1}</bdi></a>
       <a href="${b}contact.html" class="btn btn--ghost btn--lg">احجز موعدًا</a>
     </div>
   </div>

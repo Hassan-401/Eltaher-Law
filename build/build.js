@@ -9,7 +9,24 @@ const site = require('./data/site');
 const icons = require('./data/icons');
 const services = require('./data/services');
 const articles = require('./data/articles');
+const groups = require('./data/groups');
 const T = require('./templates');
+
+/* ترتيب المجالات حسب المجموعات، مع التحقق من عدم سقوط أي مجال.
+   نُرتّب المصفوفة نفسها في مكانها ليستفيد منها القالب أيضًا. */
+const orderMap = new Map();
+groups.forEach((g, gi) => g.slugs.forEach((slug, si) => orderMap.set(slug, gi * 1000 + si)));
+
+const ungrouped = services.filter((s) => !orderMap.has(s.slug)).map((s) => s.slug);
+if (ungrouped.length) {
+  throw new Error('مجالات غير مصنّفة في build/data/groups.js: ' + ungrouped.join(', '));
+}
+const missingContent = [...orderMap.keys()].filter((slug) => !services.some((s) => s.slug === slug));
+if (missingContent.length) {
+  throw new Error('مجالات مذكورة في groups.js بلا محتوى في services.js: ' + missingContent.join(', '));
+}
+
+services.sort((a, b) => orderMap.get(a.slug) - orderMap.get(b.slug));
 
 const ROOT = path.join(__dirname, '..');
 const { layout, pageHero, ctaBand, serviceCard, articleCard, formatDate, waLink } = T;
@@ -20,6 +37,14 @@ function minutesLabel(n) {
   if (n === 2) return 'دقيقتان';
   if (n <= 10) return n + ' دقائق';
   return n + ' دقيقة';
+}
+
+/* صياغة عربية سليمة لعدد التخصصات (تمييز العدد) */
+function countLabel(n) {
+  if (n === 1) return 'تخصص واحد';
+  if (n === 2) return 'تخصصان';
+  if (n <= 10) return n + ' تخصصات';
+  return n + ' تخصصًا';
 }
 
 /* حساب زمن القراءة وترتيب المقالات من الأحدث */
@@ -46,10 +71,10 @@ function asideContact(depth) {
 <aside class="sticky-card reveal">
   <h3>استشارة سريعة</h3>
   <p>اشرح لنا موقفك ونوجّهك للخطوة الصحيحة. المكتب يستقبلكم ${site.hours}.</p>
-  <a href="${waLink('السلام عليكم، أرغب في استشارة قانونية')}" target="_blank" rel="noopener" class="btn btn--gold btn--block">
+  <a href="${waLink('السلام عليكم، أرغب في استشارة قانونية')}" target="_blank" rel="noopener" class="btn btn--wa btn--block">
     ${icons.whatsapp} تواصل عبر واتساب
   </a>
-  <a href="tel:${site.phone1}" class="btn btn--line btn--block">${site.phone1}</a>
+  <a href="tel:${site.phone1}" class="btn btn--call btn--block">${icons.phoneSolid} <bdi dir="ltr">${site.phone1}</bdi></a>
   <ul class="sticky-card__list">
     <li>${icons.clock}<span>${site.hours}</span></li>
     <li>${icons.pin}<span>${site.address}</span></li>
@@ -115,7 +140,27 @@ const orgJsonLd = JSON.stringify({
 /* 1) الصفحة الرئيسية                                                  */
 /* ================================================================== */
 function buildHome() {
-  const cards = services.map((s, i) => serviceCard(s, 0, i % 4)).join('');
+  const bySlug = Object.fromEntries(services.map((s) => [s.slug, s]));
+
+  const groupPanels = groups
+    .map(
+      (g, gi) => `
+      <div class="gcard reveal"${gi ? ` data-delay="${gi}"` : ''}>
+        <span class="gcard__icon">${icons[g.icon]}</span>
+        <h3>${g.title}</h3>
+        <p>${g.sub}</p>
+        <ul class="gcard__list">
+          ${g.slugs
+            .map(
+              (slug) =>
+                `<li><a href="services/${slug}.html">${bySlug[slug].navTitle}</a></li>`
+            )
+            .join('')}
+        </ul>
+      </div>`
+    )
+    .join('');
+
   const latest = articles.slice(0, 3).map((a, i) => articleCard(a, 0, i)).join('');
 
   const content = `
@@ -145,7 +190,10 @@ function buildHome() {
       </p>
 
       <div class="hero__cta reveal" data-delay="3">
-        <a href="${waLink('السلام عليكم، أرغب في استشارة قانونية')}" target="_blank" rel="noopener" class="btn btn--gold btn--lg">
+        <a href="tel:${site.phone1}" class="btn btn--call btn--lg">
+          ${icons.phoneSolid} اتصل الآن — <bdi dir="ltr">${site.phone1}</bdi>
+        </a>
+        <a href="${waLink('السلام عليكم، أرغب في استشارة قانونية')}" target="_blank" rel="noopener" class="btn btn--wa btn--lg">
           ${icons.whatsapp} استشارة عبر واتساب
         </a>
         <a href="services.html" class="btn btn--ghost btn--lg">تصفّح مجالات العمل</a>
@@ -218,12 +266,16 @@ function buildHome() {
   <div class="container">
     <div class="section__head">
       <span class="eyebrow reveal">مجالات العمل</span>
-      <h2 class="h2 reveal" data-delay="1">نغطي <span class="grad">جميع التخصصات</span> القانونية</h2>
+      <h2 class="h2 reveal" data-delay="1">نغطي <span class="grad">${services.length} تخصصًا</span> قانونيًا</h2>
       <p class="section__sub reveal" data-delay="2">
-        لكل مجال صفحة مستقلة تشرح ما نقدّمه فيه ومتى تحتاج محاميًا والأسئلة الشائعة حوله.
+        مقسّمة إلى أربع مجموعات حسب طبيعة النزاع — ولكل تخصص صفحة مستقلة تشرح ما نقدّمه فيه
+        ومتى تحتاج محاميًا والأسئلة الشائعة حوله.
       </p>
     </div>
-    <div class="cards">${cards}</div>
+    <div class="gcards">${groupPanels}</div>
+    <div class="center-btn reveal">
+      <a href="services.html" class="btn btn--ghost btn--lg">تفاصيل كل التخصصات</a>
+    </div>
   </div>
 </section>
 
@@ -431,20 +483,45 @@ ${quickContact(0)}
 /* 3) فهرس مجالات العمل                                                */
 /* ================================================================== */
 function buildServicesIndex() {
-  const cards = services.map((s, i) => serviceCard(s, 0, i % 4)).join('');
+  const bySlug = Object.fromEntries(services.map((s) => [s.slug, s]));
+
+  const sections = groups
+    .map(
+      (g, gi) => `
+    <section class="gsec reveal" id="${g.key}">
+      <header class="gsec__head">
+        <span class="gsec__badge">${icons[g.icon]}</span>
+        <div>
+          <span class="gsec__no">المجموعة ${['الأولى', 'الثانية', 'الثالثة', 'الرابعة'][gi] || gi + 1}</span>
+          <h2>${g.title}</h2>
+          <p>${g.sub}</p>
+        </div>
+        <span class="gsec__count">${countLabel(g.slugs.length)}</span>
+      </header>
+      <div class="cards">
+        ${g.slugs.map((slug, i) => serviceCard(bySlug[slug], 0, i % 4)).join('')}
+      </div>
+    </section>`
+    )
+    .join('');
+
+  const jump = groups
+    .map((g) => `<a href="#${g.key}">${g.title}</a>`)
+    .join('');
 
   const content = `
 ${pageHero({
   eyebrow: 'مجالات العمل',
-  title: 'جميع التخصصات القانونية',
-  sub: `${services.length} مجالًا نغطيها داخل المكتب — لكل مجال صفحة تشرح ما نقدّمه فيه، ومتى تحتاج محاميًا، والمستندات المطلوبة، وأشهر الأسئلة.`,
+  title: `${services.length} تخصصًا قانونيًا تحت سقف واحد`,
+  sub: 'مقسّمة إلى أربع مجموعات حسب طبيعة كل نزاع — ولكل تخصص صفحة تشرح ما نقدّمه فيه، ومتى تحتاج محاميًا، والمستندات المطلوبة، وأشهر الأسئلة.',
   crumbs: [{ label: 'مجالات العمل' }],
   depth: 0
 })}
 
 <section class="section">
   <div class="container">
-    <div class="cards">${cards}</div>
+    <nav class="jump reveal" aria-label="تنقّل بين المجموعات">${jump}</nav>
+    ${sections}
     <p class="services__note reveal">
       لم تجد تخصصك في القائمة؟ نحن نغطي <b>جميع التخصصات</b> —
       <a href="${waLink()}" target="_blank" rel="noopener">راسلنا على واتساب</a> وسنوجّهك.
@@ -827,7 +904,7 @@ ${pageHero({
           <textarea id="fMsg" name="message" rows="5" placeholder="اشرح لنا موقفك باختصار..." required></textarea>
         </div>
 
-        <button type="submit" class="btn btn--gold btn--lg btn--block">
+        <button type="submit" class="btn btn--wa btn--lg btn--block">
           إرسال عبر واتساب ${icons.whatsapp}
         </button>
         <a class="form__alt" href="mailto:${site.email}">أو راسلنا على البريد الإلكتروني</a>

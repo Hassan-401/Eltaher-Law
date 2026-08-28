@@ -1249,3 +1249,207 @@ svg{ width:1em; height:1em; }
   .sticky-card{ max-width:none; }
   .post > .lead{ padding:1rem 1.1rem; }
 }
+
+/* ==========================================================
+   ======  زر الاتصال البارز + المجموعات + شريط الاتصال  =====
+   ========================================================== */
+
+:root{
+  --call:      #ff7a18;
+  --call-lite: #ffa14d;
+  --call-deep: #e05a04;
+  --wa:        #25d366;
+  --wa-deep:   #12a150;
+}
+
+/* ---------- زر الاتصال (اللون الأبرز في الموقع) ---------- */
+.btn--call{
+  position:relative;
+  background:linear-gradient(135deg,var(--call-lite) 0%,var(--call) 48%,var(--call-deep) 100%);
+  color:#1a0d02;
+  font-weight:800;
+  box-shadow:0 16px 40px -14px rgba(255,122,24,.75);
+}
+.btn--call:hover{
+  transform:translateY(-3px);
+  box-shadow:0 24px 54px -14px rgba(255,122,24,.9);
+}
+.btn--call bdi{ font-weight:800; }
+
+/* حلقة نابضة تلفت النظر — على زر الهيدر فقط حتى لا تتكرر */
+.btn--pulse::after{
+  content:''; position:absolute; inset:-2px; border-radius:inherit;
+  border:2px solid var(--call);
+  animation:callPulse 2.4s cubic-bezier(.22,.8,.28,1) infinite;
+  pointer-events:none;
+}
+@keyframes callPulse{
+  0%{   transform:scale(1);    opacity:.8; }
+  70%{  transform:scale(1.22); opacity:0; }
+  100%{ transform:scale(1.22); opacity:0; }
+}
+
+/* ---------- زر واتساب ---------- */
+.btn--wa{
+  background:linear-gradient(135deg,#3ce07b 0%,var(--wa) 45%,var(--wa-deep) 100%);
+  color:#05210f;
+  font-weight:800;
+  box-shadow:0 16px 40px -16px rgba(37,211,102,.6);
+}
+.btn--wa:hover{ transform:translateY(-3px); box-shadow:0 22px 50px -16px rgba(37,211,102,.75); }
+
+/* زر الهيدر: أوضح قليلًا من قبل */
+.nav__actions .btn--call{ letter-spacing:.01em; }
+
+/* ---------- بطاقات المجموعات (الصفحة الرئيسية) ---------- */
+.gcards{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.3rem;
+}
+.gcard{
+  position:relative; isolation:isolate;
+  padding:2rem 1.8rem;
+  background:linear-gradient(165deg,var(--surface),var(--bg-2));
+  border:1px solid var(--line-soft); border-radius:var(--r-lg);
+  overflow:hidden;
+  transition:transform .5s var(--ease), border-color .5s var(--ease), box-shadow .5s var(--ease);
+}
+.gcard::before{
+  content:''; position:absolute; inset:0; z-index:-1;
+  background:radial-gradient(340px 190px at 100% 0%, rgba(212,175,55,.14), transparent 70%);
+  opacity:0; transition:opacity .5s var(--ease);
+}
+.gcard:hover{ transform:translateY(-6px); border-color:rgba(212,175,55,.3); box-shadow:var(--shadow); }
+.gcard:hover::before{ opacity:1; }
+.gcard__icon{
+  display:grid; place-items:center;
+  width:54px; height:54px; margin-bottom:1.1rem;
+  border-radius:16px; font-size:26px; color:#12100a;
+  background:var(--grad-gold);
+  box-shadow:var(--shadow-gold);
+}
+.gcard h3{ font-size:1.14rem; line-height:1.5; margin-bottom:.45rem; }
+.gcard > p{ font-size:.9rem; margin-bottom:1.1rem; }
+.gcard__list{ display:grid; gap:.1rem; padding-top:1rem; border-top:1px solid var(--line-soft); }
+.gcard__list a{
+  display:block; position:relative;
+  padding:.45rem 1.1rem .45rem 0;
+  font-size:.94rem; color:var(--muted);
+  transition:color .3s var(--ease), transform .3s var(--ease);
+}
+.gcard__list a::before{
+  content:''; position:absolute; inset-inline-start:.25rem; top:1.05em;
+  width:5px; height:5px; border-radius:50%; background:var(--gold); opacity:.6;
+  transition:opacity .3s var(--ease);
+}
+.gcard__list a:hover{ color:var(--gold); transform:translateX(-4px); }
+.gcard__list a:hover::before{ opacity:1; }
+
+/* ---------- أقسام المجموعات (صفحة مجالات العمل) ---------- */
+.jump{
+  display:flex; flex-wrap:wrap; gap:.6rem;
+  margin-bottom:clamp(2rem,4vw,3rem);
+}
+.jump a{
+  padding:.55rem 1.15rem; border-radius:99px;
+  background:rgba(255,255,255,.04); border:1px solid var(--line-soft);
+  color:var(--muted);
+  font-family:'Cairo',sans-serif; font-weight:600; font-size:.88rem;
+  transition:.35s var(--ease);
+}
+.jump a:hover{ color:var(--gold); border-color:rgba(212,175,55,.4); background:rgba(212,175,55,.08); }
+
+.gsec{ margin-bottom:clamp(2.8rem,6vw,4.5rem); scroll-margin-top:100px; }
+.gsec:last-of-type{ margin-bottom:0; }
+.gsec__head{
+  display:flex; align-items:center; gap:1.1rem;
+  padding:1.4rem 1.6rem; margin-bottom:1.3rem;
+  border:1px solid var(--line); border-radius:var(--r);
+  background:
+    radial-gradient(500px 200px at 100% 0%, rgba(212,175,55,.12), transparent 70%),
+    linear-gradient(160deg,var(--surface-2),var(--bg-2));
+}
+.gsec__badge{
+  display:grid; place-items:center; flex:none;
+  width:52px; height:52px; border-radius:15px; font-size:25px; color:#12100a;
+  background:var(--grad-gold); box-shadow:var(--shadow-gold);
+}
+.gsec__no{
+  display:block;
+  font-family:'Cairo',sans-serif; font-size:.76rem; font-weight:700;
+  letter-spacing:.06em; color:var(--gold);
+}
+.gsec__head h2{ font-size:clamp(1.15rem,2.4vw,1.5rem); margin:.15rem 0 .2rem; }
+.gsec__head p{ margin:0; font-size:.9rem; }
+.gsec__count{
+  margin-inline-start:auto; flex:none;
+  padding:.4rem .9rem; border-radius:99px;
+  background:rgba(212,175,55,.1); border:1px solid rgba(212,175,55,.25);
+  color:var(--gold);
+  font-family:'Cairo',sans-serif; font-size:.82rem; font-weight:700; white-space:nowrap;
+}
+
+/* ---------- القائمة المنسدلة: 3 أعمدة لاستيعاب 18 مجالًا ---------- */
+@media (min-width:981px){
+  .nav__mega{ width:min(94vw,900px); }
+  .mega__grid{ grid-template-columns:repeat(3,1fr); }
+  .mega__txt small{ display:none; }
+  .mega__grid > a{ padding:.6rem .7rem; }
+}
+
+/* ---------- شريط الاتصال الثابت (موبايل) ---------- */
+.callbar{
+  position:fixed; inset-inline:0; bottom:0; z-index:96;
+  display:none; gap:.6rem;
+  padding:.6rem .7rem calc(.6rem + env(safe-area-inset-bottom,0px));
+  background:rgba(10,12,15,.96);
+  backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);
+  box-shadow:0 -14px 40px -22px rgba(0,0,0,.95);
+}
+.callbar__btn{
+  flex:1 1 0; min-width:0;
+  display:flex; align-items:center; justify-content:center; gap:.55rem;
+  padding:.75rem .6rem; border-radius:14px;
+  font-family:'Cairo',sans-serif;
+}
+.callbar__btn svg{ width:20px; height:20px; flex:none; }
+.callbar__btn span{ display:flex; flex-direction:column; line-height:1.25; min-width:0; }
+.callbar__btn b{ font-size:.95rem; font-weight:800; }
+.callbar__btn small{ font-size:.7rem; opacity:.8; }
+.callbar__btn--call{
+  background:linear-gradient(135deg,var(--call-lite),var(--call) 50%,var(--call-deep));
+  color:#1a0d02;
+  box-shadow:0 10px 26px -10px rgba(255,122,24,.8);
+}
+.callbar__btn--wa{
+  background:linear-gradient(135deg,#3ce07b,var(--wa) 45%,var(--wa-deep));
+  color:#05210f;
+  box-shadow:0 10px 26px -10px rgba(37,211,102,.7);
+}
+.callbar__btn:active{ transform:scale(.97); }
+
+@media (max-width:760px){
+  .callbar{ display:flex; }
+  /* مساحة أسفل الصفحة حتى لا يغطي الشريط آخر المحتوى.
+     نضيف safe-area لأن الشريط نفسه يكبر على الهواتف ذات شريط الإيماءات. */
+  body{ padding-bottom:calc(80px + env(safe-area-inset-bottom,0px)); }
+  /* الزر العائم لواتساب صار مكررًا مع الشريط */
+  .fab--wa{ display:none; }
+  .fab--top{ bottom:calc(80px + env(safe-area-inset-bottom,0px) + .9rem); }
+}
+
+/* القائمة الجانبية تعلو شريط الاتصال */
+@media (max-width:760px){
+  .nav__links{ z-index:101; }
+  .nav__scrim{ z-index:95; }
+}
+
+/* ---------- استجابة الإضافات ---------- */
+@media (max-width:760px){
+  .gsec__head{ flex-wrap:wrap; gap:.9rem; padding:1.2rem 1.2rem; }
+  .gsec__count{ margin-inline-start:0; }
+  .jump{ gap:.45rem; }
+  .jump a{ padding:.45rem .9rem; font-size:.82rem; }
+  .hero__cta .btn{ flex:1 1 100%; }
+}
