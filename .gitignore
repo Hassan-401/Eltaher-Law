@@ -1,0 +1,19 @@
+# تبعيات
+node_modules/
+
+# ملفات النظام
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# محررات وأدوات محلية
+.claude/
+.vscode/
+.idea/
+
+# سجلات ومؤقتات
+*.log
+npm-debug.log*
+.cache/
+tmp/
